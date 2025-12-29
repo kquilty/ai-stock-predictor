@@ -1,35 +1,80 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+    const [count, setCount] = useState(0)
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    return (
+        <>
+
+            <Header />
+
+            <Instructions />
+
+            <Input />
+
+            <AddedTickersList />
+
+            <GenerateReportButton />
+
+            <Footer />
+
+        </>
+    )
 }
 
-export default App
+function Header() {
+        return (
+        <header>
+            <h1>Stock Predictor</h1>
+            <h2>Powered by AI</h2>
+        </header>
+    )
+}
+
+function Instructions() {
+    return (
+        <section>
+            <p>Add up to 3 stock tickers below to predict their future prices.</p>
+        </section>
+    )
+}
+
+function Input() {
+
+    return (
+        <div className="card">
+            <input type="text" placeholder="Enter stock ticker" />
+            <button>
+                Add Ticker
+            </button>
+        </div>
+    )
+}
+
+function AddedTickersList() {
+    return (
+        <section>
+            <h3>Added Tickers:</h3>
+            <ul>
+                <li>--NONE--</li>
+            </ul>
+        </section>
+    )
+}
+
+function GenerateReportButton() {
+    return (
+        <section>
+            <button>Generate Report</button>
+        </section>
+    )
+}
+
+function Footer() {
+    return (
+        <footer>
+            <p>THIS IS NOT REAL FINANCIAL ADVICE</p>
+        </footer>
+    )
+}
