@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import { dates } from './dates.js'
+import OpenAI from 'openai';
 
 export default function App() {
     const [stockTickers, setStockTickers] = useState(['NVDA', 'AAPL'])
@@ -9,14 +10,57 @@ export default function App() {
     const [reportContent, setReportContent] = useState('')
 
     async function handleGenerateReport() {
+        setIsReportGenerated(false)
         setIsGeneratingReport(true)
 
-        const reportGenerated = await fetchStockData()
-        setIsGeneratingReport(false)
-
-        if (reportGenerated) {
-            setIsReportGenerated(true)
+        // Fetch the stock data from the Polygon API...
+        const stockData = await fetchStockData()
+        if(stockData === false) {
+            console.error('Error fetching stock data')
+            setIsGeneratingReport(false)
+            return;
         }
+
+        // Fetch the report content from OpenAI...
+        const reportContent = await fetchReportData(stockData)
+
+        // If it worked...
+        if (reportContent) {
+
+            // Set the content to display it
+            setReportContent(reportContent)
+
+            setIsReportGenerated(true)
+        } else {
+            console.error('Error generating report content')
+        }
+
+        setIsGeneratingReport(false)
+    }
+
+    async function fetchReportData(stockData) {
+        const openai = new OpenAI({
+            apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+            dangerouslyAllowBrowser: true
+        })
+
+        const messages = [
+            {
+                role: 'system',
+                content: 'You are a stock market expert. Data on a few specific stocks over the past few days will be provided to you. Provide a brief summary on whether to buy or sell the shares from these based on that data.'
+            },
+            {
+                role: 'user',
+                content: JSON.stringify(stockData)
+            }
+        ]
+
+        const response = await openai.chat.completions.create({
+            model: 'gpt-5-nano',
+            messages: messages
+        })
+
+        return response.choices[0].message.content
     }
 
     async function fetchStockData() {
@@ -24,7 +68,7 @@ export default function App() {
         // loadingArea.style.display = 'flex'
         try {
             
-            const stockData = await Promise.all(stockTickers.map(async (ticker) => {
+            const allStockData = await Promise.all(stockTickers.map(async (ticker) => {
                 const url = `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/1/day/${dates.startDate}/${dates.endDate}?apiKey=${import.meta.env.VITE_POLYGON_API_KEY}`
                 const response = await fetch(url)
                 const data = await response.text()
@@ -45,13 +89,10 @@ export default function App() {
             // await new Promise(resolve => setTimeout(resolve, 2000))
             // const stockData = stockTickers.map(ticker => `Data for ${ticker}\n`)           
             // const newReportContent = 'Fetched Stock Data:\n' + stockData.join('')
-
-            const newReportContent = 'Fetched Stock Data:\n' + stockData.join('\n')
-
-            setReportContent(newReportContent)
+            // setReportContent(newReportContent)
 
             // Success
-            return true;
+            return allStockData;
 
         } catch(err) {
             //loadingArea.innerText = 'There was an error fetching stock data.'
