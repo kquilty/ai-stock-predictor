@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import './App.css'
+import { dates } from './dates.js'
 
 export default function App() {
-    const [stockTickers, setStockTickers] = useState([])
+    const [stockTickers, setStockTickers] = useState(['NVDA', 'AAPL'])
     const [isGeneratingReport, setIsGeneratingReport] = useState(false)
     const [isReportGenerated, setIsReportGenerated] = useState(false)
     const [reportContent, setReportContent] = useState('')
@@ -22,12 +23,16 @@ export default function App() {
         // document.querySelector('.action-panel').style.display = 'none'
         // loadingArea.style.display = 'flex'
         try {
-            /*
-            const stockData = await Promise.all(tickersArr.map(async (ticker) => {
-                const url = `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/1/day/${dates.startDate}/${dates.endDate}?apiKey=${process.env.POLYGON_API_KEY}`
+            
+            const stockData = await Promise.all(stockTickers.map(async (ticker) => {
+                const url = `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/1/day/${dates.startDate}/${dates.endDate}?apiKey=${import.meta.env.VITE_POLYGON_API_KEY}`
                 const response = await fetch(url)
                 const data = await response.text()
                 const status = await response.status
+
+                console.log('data for ', ticker, ': ')
+                console.log(data)
+
                 if (status === 200) {
                     //apiMessage.innerText = 'Creating report...'
                     return data
@@ -35,12 +40,13 @@ export default function App() {
                     //loadingArea.innerText = 'There was an error fetching stock data.'
                 }
             }))
-            */
 
             // Simulated stock data fetch
-            await new Promise(resolve => setTimeout(resolve, 2000))
-            const stockData = stockTickers.map(ticker => `Data for ${ticker}\n`)           
-            const newReportContent = 'Fetched Stock Data:\n' + stockData.join('')
+            // await new Promise(resolve => setTimeout(resolve, 2000))
+            // const stockData = stockTickers.map(ticker => `Data for ${ticker}\n`)           
+            // const newReportContent = 'Fetched Stock Data:\n' + stockData.join('')
+
+            const newReportContent = 'Fetched Stock Data:\n' + stockData.join('\n')
 
             setReportContent(newReportContent)
 
