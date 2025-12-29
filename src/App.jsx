@@ -4,6 +4,55 @@ import './App.css'
 export default function App() {
     const [stockTickers, setStockTickers] = useState([])
     const [isGeneratingReport, setIsGeneratingReport] = useState(false)
+    const [isReportGenerated, setIsReportGenerated] = useState(false)
+    const [reportContent, setReportContent] = useState('')
+
+    async function handleGenerateReport() {
+        setIsGeneratingReport(true)
+
+        const reportGenerated = await fetchStockData()
+        setIsGeneratingReport(false)
+
+        if (reportGenerated) {
+            setIsReportGenerated(true)
+        }
+    }
+
+    async function fetchStockData() {
+        // document.querySelector('.action-panel').style.display = 'none'
+        // loadingArea.style.display = 'flex'
+        try {
+            /*
+            const stockData = await Promise.all(tickersArr.map(async (ticker) => {
+                const url = `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/1/day/${dates.startDate}/${dates.endDate}?apiKey=${process.env.POLYGON_API_KEY}`
+                const response = await fetch(url)
+                const data = await response.text()
+                const status = await response.status
+                if (status === 200) {
+                    //apiMessage.innerText = 'Creating report...'
+                    return data
+                } else {
+                    //loadingArea.innerText = 'There was an error fetching stock data.'
+                }
+            }))
+            */
+
+            // Simulated stock data fetch
+            await new Promise(resolve => setTimeout(resolve, 2000))
+            const stockData = stockTickers.map(ticker => `Data for ${ticker}\n`)           
+            const newReportContent = 'Fetched Stock Data:\n' + stockData.join('')
+
+            setReportContent(newReportContent)
+
+            // Success
+            return true;
+
+        } catch(err) {
+            //loadingArea.innerText = 'There was an error fetching stock data.'
+            console.error('error: ', err)
+        }
+        return false;
+    }
 
     return (
         <>
@@ -12,13 +61,25 @@ export default function App() {
 
             <Instructions />
 
-            <Input onAddTicker={(ticker) => setStockTickers([...stockTickers, ticker])} />
+            {stockTickers.length < 3 && 
+                <Input onAddTicker={(ticker) => setStockTickers([...stockTickers, ticker])} />
+            }
 
-            <AddedTickersList stockTickers={stockTickers} />
+            {stockTickers.length > 0 && 
+                <AddedTickersList stockTickers={stockTickers} />
+            }
 
-            <GenerateReportButton setIsGeneratingReport={setIsGeneratingReport} />
+            {stockTickers.length > 0 && 
+                <GenerateReportButton onClick={handleGenerateReport} />
+            }
 
-            {isGeneratingReport && <ReportOutput stockTickers={stockTickers} />}
+            {isGeneratingReport && 
+                <LoadingStatus />
+            }
+
+            {isReportGenerated && 
+                <ReportOutput reportContent={reportContent} />
+            }
 
             <Footer />
 
@@ -46,7 +107,7 @@ function Instructions() {
 function Input({ onAddTicker }) {
 
     return (
-        <div className="card">
+        <section className="card">
             <input type="text" placeholder="Enter stock ticker" id="ticker-input" />
             <button onClick={() => {
                 const input = document.querySelector('#ticker-input');
@@ -58,13 +119,13 @@ function Input({ onAddTicker }) {
             }}>
                 Add Ticker
             </button>
-        </div>
+        </section>
     )
 }
 
 function AddedTickersList({ stockTickers }) {
     return (
-        <section>
+        <section className="card">
             <h3>Added Tickers:</h3>
             <ul>
                 {stockTickers.length === 0 ? (
@@ -77,22 +138,31 @@ function AddedTickersList({ stockTickers }) {
     )
 }
 
-function GenerateReportButton({ setIsGeneratingReport }) {
+function GenerateReportButton({ onClick }) {
     return (
         <section>
-            <button onClick={() => setIsGeneratingReport(true)}>Generate Report</button>
+            <button onClick={onClick}>Generate Report</button>
         </section>
     )
 }
 
-function ReportOutput({ stockTickers }) {
+function LoadingStatus() {
     return (
-        <section>
+        <section className="card">
+            <h3>Generating Report...</h3>
+            <p>Please wait while we analyze the data and create your report.</p>
+        </section>
+    )
+}
+
+function ReportOutput({ reportContent }) {
+    return (
+        <section className="card">
             <h3>Report Output:</h3>
-            {stockTickers.length === 0 ? (
-                <p>No tickers added. Please add stock tickers to generate a report.</p>
+            {reportContent.length === 0 ? (
+                <p>No content found.</p>
             ) : (
-                <p>Report for: {stockTickers.join(', ')}</p>
+                <pre>{reportContent}</pre>
             )}
         </section>
     )
