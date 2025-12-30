@@ -64,7 +64,7 @@ export default function App() {
     async function fetchReportData(stockData) {
         const openai = new OpenAI({
             apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-            // dangerouslyAllowBrowser: true
+            dangerouslyAllowBrowser: true
         })
 
         const messages = [
@@ -177,7 +177,7 @@ export default function App() {
 
             <Instructions />
 
-            {stockTickers.length < 3 && 
+            {stockTickers.length < 3 && !isGeneratingReport && !isReportGenerated &&
                 <InputBlock onAddTicker={(ticker) => handleAddTicker(ticker)} />
             }
 
@@ -197,7 +197,10 @@ export default function App() {
             }
 
             {isReportGenerated && 
-                <ReportOutput reportContent={reportContent} />
+                <ReportOutput reportContent={reportContent} onClear={() => {
+                    setReportContent('')
+                    setIsReportGenerated(false)}
+                } />
             }
 
             <Footer />
@@ -309,9 +312,31 @@ function LoadingStatus() {
     )
 }
 
-function ReportOutput({ reportContent }) {
+function ReportOutput({ reportContent, onClear }) {
     return (
-        <section className="card" id="report-output">
+        <section className="card" id="report-output"  style={{position: 'relative'}}>
+            <button 
+                onClick={onClear}
+                style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '20px',
+                    cursor: 'pointer',
+                    color: '#666',
+                    padding: '5px 10px',
+                    lineHeight: '1',
+                    opacity: '0.6',
+                    transition: 'opacity 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.opacity = '1'}
+                onMouseLeave={(e) => e.target.style.opacity = '0.6'}
+                title="Clear all tickers"
+            >
+                ×
+            </button>
             {reportContent.length === 0 ? (
                 <div>
                     <p>No content found!</p>
