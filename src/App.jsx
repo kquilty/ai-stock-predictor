@@ -239,7 +239,7 @@ function InputBlock({ onAddTicker }) {
         <a key={ticker} onClick={() => {
             onAddTicker(ticker)
             document.querySelector("#ticker-input").focus();
-        }} style={{cursor: 'pointer', color: 'darkblue'}}>
+        }} className="quick-ticker-link">
             {ticker}
         </a>
     ))
@@ -250,14 +250,28 @@ function InputBlock({ onAddTicker }) {
                 e.preventDefault();
                 onAddTicker();
             }}>
-                <input type="text" placeholder="Enter stock ticker" id="ticker-input" maxLength={5} />
+                <input 
+                    type="text" 
+                    placeholder="Enter a stock ticker..." 
+                    id="ticker-input" 
+                    maxLength={5} 
+                    className='ticker-input-empty'
+                    onChange={(e) => {
+                        const input = e.target;
+                        if (input.value.trim()) {
+                            input.className = 'ticker-input-with-content';
+                        } else {
+                            input.className = 'ticker-input-empty';
+                        }
+                    }}
+                />
                 <button type="submit" onClick={()=> document.querySelector("#ticker-input").focus()}>
                     Add Ticker
                 </button>
             </form>
-            {/* <div style={{marginTop: '10px'}}>
-                for example...
-            </div> */}
+            <div style={{marginTop: '25px', fontSize: '0.7rem', fontWeight: 'bold',  borderBottom: '1px solid #ccc', color: '#aaa'}}>
+                COMMON TICKERS
+            </div>
             <div className='quick-ticker-link-list'>
                 {quickTickerLinks}
             </div>
