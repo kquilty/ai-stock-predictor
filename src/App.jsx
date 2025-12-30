@@ -12,6 +12,10 @@ export default function App() {
     const [reportContent, setReportContent] = useState('')
 
     
+    // On load, focus the input box
+    useEffect(() => {
+        document.querySelector('#ticker-input').focus();
+    }, []);
 
     // When thinking starts, scroll to the thinking message
     useEffect(() => {
@@ -60,7 +64,7 @@ export default function App() {
     async function fetchReportData(stockData) {
         const openai = new OpenAI({
             apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-            dangerouslyAllowBrowser: true
+            // dangerouslyAllowBrowser: true
         })
 
         const messages = [
@@ -126,6 +130,46 @@ export default function App() {
         return false;
     }
 
+    function handleAddTicker(ticker = null) {
+        const input = document.querySelector('#ticker-input');
+        if (!ticker) {
+            ticker = input.value.trim();
+        }
+
+
+        if (ticker) {
+
+            ticker = ticker.trim().toUpperCase();
+
+            // Prevent duplicates
+            if (stockTickers.includes(ticker)) {
+                // alert('Ticker already added!')
+                input.value = '';
+                return;
+            }
+
+            // Prevent more than 3
+            if (stockTickers.length >= 3) {
+                alert('You can only add up to 3 tickers.')
+                input.value = '';
+                return;
+            }
+
+            // Validate ticker format (simple alphanumeric check)
+            const tickerRegex = /^[A-Z0-9]{1,5}$/;
+            if (!tickerRegex.test(ticker)) {
+                alert('Invalid ticker format. (must be 1-5 alphanumeric characters)')
+                input.value = '';
+                return;
+            }
+
+            // Add it
+            setStockTickers([...stockTickers, ticker])
+
+            input.value = '';
+        }
+    }
+
     return (
         <>
 
@@ -134,7 +178,7 @@ export default function App() {
             <Instructions />
 
             {stockTickers.length < 3 && 
-                <InputBlock onAddTicker={(ticker) => setStockTickers([...stockTickers, ticker])} />
+                <InputBlock onAddTicker={(ticker) => handleAddTicker(ticker)} />
             }
 
             {stockTickers.length > 0 && 
@@ -191,17 +235,15 @@ function InputBlock({ onAddTicker }) {
 
     return (
         <section className="card">
-            <input type="text" placeholder="Enter stock ticker" id="ticker-input" />
-            <button onClick={() => {
-                const input = document.querySelector('#ticker-input');
-                const ticker = input.value.trim().toUpperCase();
-                if (ticker) {
-                    onAddTicker(ticker);
-                    input.value = '';
-                }
+            <form className="add-ticker-form" onSubmit={(e) => {
+                e.preventDefault();
+                onAddTicker();
             }}>
-                Add Ticker
-            </button>
+                <input type="text" placeholder="Enter stock ticker" id="ticker-input" maxLength={5} />
+                <button type="submit" onClick={()=> document.querySelector("#ticker-input").focus()}>
+                    Add Ticker
+                </button>
+            </form>
             {/* <div style={{marginTop: '10px'}}>
                 for example...
             </div> */}

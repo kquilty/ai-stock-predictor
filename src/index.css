@@ -36,7 +36,7 @@ input {
 }
 input:focus,
 input:focus-visible {
-    outline: 4px auto -webkit-focus-ring-color;
+    /* outline: 4px auto -webkit-focus-ring-color; */
     border-color: #1e5999;
 }
 button {
@@ -67,6 +67,11 @@ button:focus-visible {
     width: 100%;
     max-width: 600px;
 }
+/*
+#ticker-input {
+     text-transform: uppercase; 
+}
+*/
 .added-tickers-list {
     display: flex;
     flex-direction: column;
