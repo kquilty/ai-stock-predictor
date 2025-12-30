@@ -1,13 +1,31 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 import { dates } from './dates.js'
 import OpenAI from 'openai';
+import Markdown from 'react-markdown'
+import loadingImage from './images/loading-circle.gif'
 
 export default function App() {
-    const [stockTickers, setStockTickers] = useState(['NVDA', 'AAPL'])
+    const [stockTickers, setStockTickers] = useState([])
     const [isGeneratingReport, setIsGeneratingReport] = useState(false)
     const [isReportGenerated, setIsReportGenerated] = useState(false)
     const [reportContent, setReportContent] = useState('')
+
+    
+
+    // When thinking starts, scroll to the thinking message
+    useEffect(() => {
+        if (isGeneratingReport) {
+            document.getElementById('loading-message').scrollIntoView({behavior: 'smooth'})
+        }
+    }, [isGeneratingReport]);
+
+    // When the report is shown, scroll to it
+    useEffect(() => {
+        if (isReportGenerated) {
+            document.getElementById('report-output').scrollIntoView({behavior: 'smooth'})
+        }
+    }, [isReportGenerated]);
 
     async function handleGenerateReport() {
         setIsReportGenerated(false)
@@ -20,6 +38,7 @@ export default function App() {
             setIsGeneratingReport(false)
             return;
         }
+        console.log('Fetched stock data: ', stockData)
 
         // Fetch the report content from OpenAI...
         const reportContent = await fetchReportData(stockData)
@@ -47,7 +66,10 @@ export default function App() {
         const messages = [
             {
                 role: 'system',
-                content: 'You are a stock market expert. Data on a few specific stocks over the past few days will be provided to you. Provide a brief summary on whether to buy or sell the shares from these based on that data.'
+                content: 'You are a stock market expert. Data on a few specific stocks over the past few days will be provided to you.'
+                        +' Provide a brief summary on whether to buy or sell the shares from these based on that data.'
+                        +' Answer in markdown format.'
+                        +' Do not recommend follow up actions.'
             },
             {
                 role: 'user',
@@ -57,8 +79,11 @@ export default function App() {
 
         const response = await openai.chat.completions.create({
             model: 'gpt-5-nano',
-            messages: messages
+            messages: messages,
+            max_completion_tokens: 5000 // Just a safety net. Should normally use around 2000.
         })
+
+        console.log('OpenAI response: ', response)
 
         return response.choices[0].message.content
     }
@@ -74,8 +99,8 @@ export default function App() {
                 const data = await response.text()
                 const status = await response.status
 
-                console.log('data for ', ticker, ': ')
-                console.log(data)
+                // console.log('Querying URL: ', url) <--- caution: exposes API key in console!
+                // console.log('data for ', ticker, ': ', data)
 
                 if (status === 200) {
                     //apiMessage.innerText = 'Creating report...'
@@ -109,18 +134,21 @@ export default function App() {
             <Instructions />
 
             {stockTickers.length < 3 && 
-                <Input onAddTicker={(ticker) => setStockTickers([...stockTickers, ticker])} />
+                <InputBlock onAddTicker={(ticker) => setStockTickers([...stockTickers, ticker])} />
             }
 
             {stockTickers.length > 0 && 
-                <AddedTickersList stockTickers={stockTickers} />
+                <AddedTickersList stockTickers={stockTickers} onClear={() => {
+                    setStockTickers([])
+                    setIsReportGenerated(false)}
+                } />
             }
 
-            {stockTickers.length > 0 && 
+            {stockTickers.length > 0 && !isGeneratingReport && !isReportGenerated &&
                 <GenerateReportButton onClick={handleGenerateReport} />
             }
 
-            {isGeneratingReport && 
+            {isGeneratingReport &&
                 <LoadingStatus />
             }
 
@@ -146,12 +174,20 @@ function Header() {
 function Instructions() {
     return (
         <section>
-            <p>Add up to 3 stock tickers below to predict their future prices.</p>
+            <p>Add up to 3 stock tickers below to predict whether you should buy, hold, or sell them.</p>
         </section>
     )
 }
 
-function Input({ onAddTicker }) {
+function InputBlock({ onAddTicker }) {
+
+    const quickTickersArray = ['NVDA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA']
+
+    const quickTickerLinks = quickTickersArray.map((ticker) => (
+        <a key={ticker} onClick={() => onAddTicker(ticker)} style={{margin: '2px 10px', cursor: 'pointer', color: 'darkblue'}}>
+            {ticker}
+        </a>
+    ))
 
     return (
         <section className="card">
@@ -166,21 +202,49 @@ function Input({ onAddTicker }) {
             }}>
                 Add Ticker
             </button>
+            {/* <div style={{marginTop: '10px'}}>
+                for example...
+            </div> */}
+            <div style={{marginTop: '15px'}}>
+                {quickTickerLinks}
+            </div>
         </section>
     )
 }
 
-function AddedTickersList({ stockTickers }) {
+function AddedTickersList({ stockTickers, onClear }) {
     return (
-        <section className="card">
+        <section className="card" style={{position: 'relative'}}>
+            <button 
+                onClick={onClear}
+                style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '20px',
+                    cursor: 'pointer',
+                    color: '#666',
+                    padding: '5px 10px',
+                    lineHeight: '1',
+                    opacity: '0.6',
+                    transition: 'opacity 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.opacity = '1'}
+                onMouseLeave={(e) => e.target.style.opacity = '0.6'}
+                title="Clear all tickers"
+            >
+                ×
+            </button>
             <h3>Added Tickers:</h3>
-            <ul>
+            <div className='added-tickers-list'>
                 {stockTickers.length === 0 ? (
-                    <li>--NONE--</li>
+                    <span>--NONE--</span>
                 ) : (
-                    stockTickers.map((ticker, index) => <li key={index}>{ticker}</li>)
+                    stockTickers.map((ticker, index) => <span key={index}>{ticker}</span>)
                 )}
-            </ul>
+            </div>
         </section>
     )
 }
@@ -195,8 +259,9 @@ function GenerateReportButton({ onClick }) {
 
 function LoadingStatus() {
     return (
-        <section className="card">
-            <h3>Generating Report...</h3>
+        <section className="card" id="loading-message">
+            <h3>Thinking...</h3>
+            <img src={loadingImage} height="200px" alt="Loading..." />
             <p>Please wait while we analyze the data and create your report.</p>
         </section>
     )
@@ -204,12 +269,19 @@ function LoadingStatus() {
 
 function ReportOutput({ reportContent }) {
     return (
-        <section className="card">
-            <h3>Report Output:</h3>
+        <section className="card" id="report-output">
             {reportContent.length === 0 ? (
-                <p>No content found.</p>
+                <div>
+                    <p>No content found!</p>
+                    <p>:(</p>
+                    <p>Please try again in a few minutes.<br />(one of the endpoints may be down)</p>
+                </div>
             ) : (
-                <pre>{reportContent}</pre>
+                <div className='report-output'>
+                    <h3>Here is what I would recommend...</h3>
+                    <span style={{fontSize: '2rem'}}>👇</span>
+                    <Markdown>{reportContent}</Markdown>
+                </div>
             )}
         </section>
     )

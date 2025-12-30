@@ -67,3 +67,21 @@ button:focus-visible {
     width: 100%;
     max-width: 600px;
 }
+.added-tickers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    span{
+        width: 100px;
+        padding: 5px;
+        width: 100px;
+        padding: 5px;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+}
+.report-output {
+    text-align: left;
+}
