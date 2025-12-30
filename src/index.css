@@ -17,7 +17,8 @@ body {
     margin: 0;
     display: flex;
     place-items: center;
-    min-width: 320px;
+    flex-wrap: wrap;
+    /* min-width: 320px; */
     min-height: 100vh;
     width: 100%;
     overflow-x: hidden;
@@ -86,6 +87,15 @@ button:focus-visible {
         margin: 15px 0;
     }
 }
+
+.quick-ticker-link-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
 /*
 #ticker-input {
      text-transform: uppercase; 

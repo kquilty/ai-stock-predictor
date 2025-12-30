@@ -184,7 +184,10 @@ export default function App() {
             {stockTickers.length > 0 && 
                 <AddedTickersList stockTickers={stockTickers} onClear={() => {
                     setStockTickers([])
-                    setIsReportGenerated(false)}
+                    setIsReportGenerated(false)
+                    setReportContent('')
+                    document.querySelector("#ticker-input").focus();
+                }
                 } />
             }
 
@@ -198,8 +201,10 @@ export default function App() {
 
             {isReportGenerated && 
                 <ReportOutput reportContent={reportContent} onClear={() => {
-                    setReportContent('')
-                    setIsReportGenerated(false)}
+                        setReportContent('')
+                        setIsReportGenerated(false)
+                        document.querySelector("#ticker-input").focus();
+                    }
                 } />
             }
 
@@ -231,7 +236,10 @@ function InputBlock({ onAddTicker }) {
     const quickTickersArray = ['NVDA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA']
 
     const quickTickerLinks = quickTickersArray.map((ticker) => (
-        <a key={ticker} onClick={() => onAddTicker(ticker)} style={{margin: '2px 10px', cursor: 'pointer', color: 'darkblue'}}>
+        <a key={ticker} onClick={() => {
+            onAddTicker(ticker)
+            document.querySelector("#ticker-input").focus();
+        }} style={{cursor: 'pointer', color: 'darkblue'}}>
             {ticker}
         </a>
     ))
@@ -250,7 +258,7 @@ function InputBlock({ onAddTicker }) {
             {/* <div style={{marginTop: '10px'}}>
                 for example...
             </div> */}
-            <div style={{marginTop: '15px'}}>
+            <div className='quick-ticker-link-list'>
                 {quickTickerLinks}
             </div>
         </section>
