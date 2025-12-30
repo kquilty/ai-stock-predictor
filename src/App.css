@@ -3,4 +3,11 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  #root {
+    padding: 1rem;
+  }
 }
