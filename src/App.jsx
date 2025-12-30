@@ -15,6 +15,9 @@ export default function App() {
     // On load, focus the input box
     useEffect(() => {
         document.querySelector('#ticker-input').focus();
+
+        // Scroll the header into view if the screen is small enough to be scrollable
+        document.querySelector('header').scrollIntoView({behavior: 'smooth'})
     }, []);
 
     // When thinking starts, scroll to the thinking message
