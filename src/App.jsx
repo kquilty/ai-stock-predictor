@@ -67,14 +67,32 @@ export default function App() {
 
     async function fetchReportData_fromWorker(stockData) {    
         try {
-            const url = 'https://openapi-api-worker.kquilty.workers.dev/openai-api-worker.js'
-            
+            let url = 'https://openapi-api-worker.kquilty.workers.dev/openai-api-worker.js'
+        
+        
+            // url = 'http://localhost:8788/openai-api-worker.js'    
+
+
+            const messages = [
+                {
+                    role: 'system',
+                    content: 'You are a stock market expert. Data on a few specific stocks over the past few days will be provided to you.'
+                            +' Provide a brief summary on whether to buy or sell the shares from these based on that data.'
+                            +' Answer in markdown format.'
+                            +' Do not recommend follow up actions.'
+                },
+                {
+                    role: 'user',
+                    content: JSON.stringify(stockData)
+                }
+            ]
+
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: ''
+                body: JSON.stringify(messages)
             })
             const data = await response.json()
 
@@ -137,7 +155,7 @@ export default function App() {
 
                 if (status === 200) {
                     //apiMessage.innerText = 'Creating report...'
-                    return data
+                    return JSON.parse(data);
                 } else {
                     //loadingArea.innerText = 'There was an error fetching stock data.'
                 }
