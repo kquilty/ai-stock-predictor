@@ -272,7 +272,7 @@ function InputBlock({ onAddTicker }) {
                     Add Ticker
                 </button>
             </form>
-            <div style={{marginTop: '25px', fontSize: '0.7rem', fontWeight: 'bold',  borderBottom: '1px solid #ccc', color: '#aaa'}}>
+            <div style={{marginTop: '25px', paddingBottom: '5px', fontSize: '0.7rem', fontWeight: 'bold',  borderBottom: '1px solid #ccc', color: '#aaa'}}>
                 COMMON TICKERS
             </div>
             <div className='quick-ticker-link-list'>
