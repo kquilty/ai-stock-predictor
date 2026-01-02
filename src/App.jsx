@@ -48,7 +48,8 @@ export default function App() {
         console.log('Fetched stock data: ', stockData)
 
         // Fetch the report content from OpenAI...
-        const reportContent = await fetchReportData(stockData)
+        // const reportContent = await fetchReportData(stockData)
+        const reportContent = await fetchReportData_fromWorker(stockData)
 
         // If it worked...
         if (reportContent) {
@@ -64,6 +65,30 @@ export default function App() {
         setIsGeneratingReport(false)
     }
 
+    async function fetchReportData_fromWorker(stockData) {    
+        try {
+            const url = 'https://openapi-api-worker.kquilty.workers.dev/openai-api-worker.js'
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: ''
+            })
+            const data = await response.json()
+
+            //TODO: handle errors from worker
+            console.log(data)
+
+            return data.content;
+        } catch (err) {
+            console.error(err.message)
+            return 'ERROR: Unable to access AI. Please refresh and try again'
+        }
+    }
+
+    /* THE OLD WAY: Using OpenAI SDK in the browser (not recommended)
     async function fetchReportData(stockData) {
         const openai = new OpenAI({
             apiKey: import.meta.env.VITE_OPENAI_API_KEY,
@@ -94,6 +119,7 @@ export default function App() {
 
         return response.choices[0].message.content
     }
+    */
 
     async function fetchStockData() {
         // document.querySelector('.action-panel').style.display = 'none'
